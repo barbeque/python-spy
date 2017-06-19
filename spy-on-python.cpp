@@ -25,11 +25,13 @@ int main(int argc, char* argv[]) {
     Py_Initialize();
     
     PyObject* pName = PyString_FromString("Hello, World!");
+    expose(pName, "pName");    
 
     // globals
     PyObject* globals = PyEval_GetGlobals();
     if(!globals) {
         std::cout << "Why did GetGlobals return null?" << std::endl;
+        // probably because we're not in an execution frame
     }
     else if(PyDict_Check(globals)) {
         std::cout << "Good news, globals IS a dictionary!" << std::endl;
@@ -40,17 +42,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Why did GetLocals return null?" << std::endl;
     }
     else if(PyDict_Check(locals)) {
-        std::cout << "Good news, locals is a dict." << std::endl;
-    }
+        std::cout << "Good news, locals is a dict." << std::endl;    }
 
     // hack up that python state pretty hard
     // identify all known python objects
-    //  1. find the root python object
-    //  2. iterate using the doubly linked list in the head
-    //  3. expose the type object from each item
-    expose(pName, "pName");
 
-    // import the GC module
+    // import the GC module so we can just use gc.get_objects
     PyObject* gcMod = PyImport_ImportModule("gc");
     expose(gcMod, "gc module");
 
@@ -60,7 +57,7 @@ int main(int argc, char* argv[]) {
     PyObject* result = PyObject_CallObject(getObjects, NULL);
     expose(result, "result of gc.get_objects");
 
-    // iterate list
+    // iterate list, thanks python
     if(PySequence_Check(result)) {
         std::cout << "Result of gc.get_objects is a sequence." << std::endl;
         Py_ssize_t length = PySequence_Length(result);
