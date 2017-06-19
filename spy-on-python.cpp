@@ -8,6 +8,7 @@ void expose_type(PyTypeObject* o) {
 
 void expose(PyObject* o) {
     std::cout << "Python object at " << std::hex << (unsigned long)o << std::endl;
+    std::cout << "\tRef count " << std::hex << o->ob_refcnt << std::endl;    
     std::cout << "\tType def at " << std::hex << (unsigned long)o->ob_type << std::endl;
     expose_type(o->ob_type);
 }
